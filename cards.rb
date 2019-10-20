@@ -47,8 +47,9 @@ class Cards
   end
 
   def play_round(deck, card_1_index, card_2_index)
-    puts "-- #{deck.size} cards left; initial cards: #{peek(deck, card_1_index, card_2_index+1)}"                  if debug
-    puts "  card 1: #{deck[card_1_index]}; card 2: #{deck[card_2_index]}"            if debug
+    can_continue = true
+    puts "\n-- #{deck.size} cards left; cards: #{peek(deck, 0, deck.size)}"            if debug
+    puts "  card 1: index = #{card_1_index} #{deck[card_1_index]}; card 2: index = #{card_2_index} #{deck[card_2_index]}"            if debug
     if deck[card_1_index].suit == deck[card_2_index].suit
       range_to_delete = (card_1_index + 1)..(card_2_index - 1)
       puts "  Deleting inner 2 cards: #{deck[range_to_delete].join(', ')}"           if debug
@@ -59,30 +60,45 @@ class Cards
       range_to_delete = card_1_index..card_2_index
       puts "  Deleting all 4 cards: #{deck[card_1_index..card_2_index].join(', ')}"  if debug
       deck[card_1_index..card_2_index] = []
+      puts "  afterwards: #{deck.join(', ')}"                                        if debug
+      puts "    #{deck.join(', ')}"                                                  if debug
 
       # maybe correct
-      if card_2_index > 3
-        card_1_index = card_1_index - 1
-        card_2_index = card_2_index - 1
+      if card_1_index >= 3
+        card_1_index = card_1_index - 3
+        card_2_index = card_2_index - 3
+      else
+        card_1_index = 0
+        card_2_index = 3
       end
 
-
-    else
+      # We should only increment the higher index if, after the increment,
+      # it can still index a card in the deck. So, for example, if the deck
+      # has 4 cards, the highest index is 3. If we come in here with a card_2_index
+      # equal to 3, we don't want it to increment to 4, because deck[4] doesn't
+      # exist.
+    elsif (card_2_index + 1) < deck.size
       card_1_index = card_1_index + 1
       card_2_index = card_2_index + 1
       puts "  Incrementing indices by 1"                                             if debug
+    else
+      # Can't continue; by definition "lose"
+      puts "  NOT incrementing"                                                      if debug
+      can_continue = false
     end
 
-    [ deck, card_1_index, card_2_index ]
+    [ deck, card_1_index, card_2_index, can_continue ]
   end
 
-  def play_game(deck)
-    debug = true
+  def play_game(deck, debug = false)
 
     card_1_index = 0
     card_2_index = 3
-    while card_2_index <= deck.size do
-      deck, card_1_index, card_2_index = play_round(deck, card_1_index, card_2_index)
+
+    can_continue = true
+    while deck.size > 0 && can_continue && (card_2_index+1) <= deck.size do
+      deck, card_1_index, card_2_index, can_continue = play_round(deck, card_1_index, card_2_index)
+      puts "******** card_1_index: #{card_1_index}; card_2_index: #{card_2_index}"   if debug
     end
 
     game_result = "lose"
