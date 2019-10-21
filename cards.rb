@@ -13,6 +13,21 @@
 # (meaning "to string"). This method is called by defualt
 # when we ask to see the value as a string.
 class Card
+  NUMBER_TO_PIP = {
+    1 => "A",
+    2 => 2,
+    3 => 3,
+    4 => 4,
+    5 => 5,
+    6 => 6,
+    7 => 7,
+    8 => 8,
+    9 => 9,
+    10 => 10,
+    11 => "J",
+    12 => "Q",
+    13 => "K"
+  }
   include Comparable
   attr_accessor :suit, :number
   def initialize(suit, number)
@@ -27,7 +42,8 @@ class Card
     # Internally, we number the cards starting at zero;
     # but since humans don't think that way, let's modify
     # this method to add 1 to the number.
-    "%2s of %8s" % [ number+1, suit ]
+
+    "%s%s" % [ suit[0], NUMBER_TO_PIP[number+1] ]
   end
 
 end
@@ -50,20 +66,30 @@ class Cards
     can_continue = true
     puts "\n-- #{deck.size} cards left; cards: #{peek(deck, 0, deck.size)}"            if debug
     puts "  card 1: index = #{card_1_index} #{deck[card_1_index]}; card 2: index = #{card_2_index} #{deck[card_2_index]}"            if debug
+
+    # same suits
     if deck[card_1_index].suit == deck[card_2_index].suit
       range_to_delete = (card_1_index + 1)..(card_2_index - 1)
       puts "  Deleting inner 2 cards: #{deck[range_to_delete].join(', ')}"           if debug
       deck[range_to_delete] = []
+      puts "  afterwards: #{deck.join(', ')}"                                        if debug
 
+      # Fix up the indices
+      if card_1_index >= 2
+        card_1_index = card_1_index - 2
+        card_2_index = card_2_index - 2
+      else
+        card_1_index = 0
+        card_2_index = 3
+      end
+    
     # Same number
     elsif deck[card_1_index].number == deck[card_2_index].number
       range_to_delete = card_1_index..card_2_index
       puts "  Deleting all 4 cards: #{deck[card_1_index..card_2_index].join(', ')}"  if debug
       deck[card_1_index..card_2_index] = []
       puts "  afterwards: #{deck.join(', ')}"                                        if debug
-      puts "    #{deck.join(', ')}"                                                  if debug
-
-      # maybe correct
+      
       if card_1_index >= 3
         card_1_index = card_1_index - 3
         card_2_index = card_2_index - 3
