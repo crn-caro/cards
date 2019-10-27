@@ -2,17 +2,22 @@ require './cards'
 
 wins = 0
 losses = 0
-games = 1000
+games = 10000
+pip_cards = 2
 
-games.times do
+def generate_deck(pip_cards)
   starting_deck = []
   SUITS.each do |suit|
-    13.times do |number|
+    pip_cards.times do |number|
       starting_deck << Card.new(suit, number + 1)
     end
   end
   starting_deck.shuffle!
+end
 
+games.times do
+
+  starting_deck = generate_deck(pip_cards)
   deck = starting_deck.dup
 
   # puts "Starting deck: #{deck.join(', ')}"
